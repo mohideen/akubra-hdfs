@@ -11,7 +11,19 @@ import org.akubraproject.UnsupportedIdException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.umd.lib.hadoop.filecache.HDFSBlobCache;
+/**
+ * 
+ * An extension of the {@link HDFSBlobStoreConnection} that uses 
+ * {@link CachedHDFSBlob} to serve requests for files whose paths ends
+ * with {@literal pathToCache} value.
+ * 
+ * The {@literal pathToCache} and {@literal cacheBase} value should be 
+ * specified in the akubra-llstore.xml file.
+ * 
+ * 
+ * @author mohideen
+ *
+ */
 
 public class CachedHDFSBlobStoreConnection extends HDFSBlobStoreConnection {
   
@@ -78,8 +90,9 @@ public class CachedHDFSBlobStoreConnection extends HDFSBlobStoreConnection {
       if(!cache.contains(uri.toString())) {
         //if key does not exists in cache, do
         if(blob.exists()) {
+
           //if blob exists in HDFS, add blob cache & return from cache
-          cache.put(uri.toString(), new HDFSBlob(uri, this));
+          cache.put(uri.toString(), blob);
           blob = (HDFSBlob)cache.get(uri.toString());
         }
       } else {

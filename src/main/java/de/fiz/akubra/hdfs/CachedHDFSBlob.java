@@ -10,6 +10,15 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is an extension of {@link HDFSBlob}. This blob tries to serve
+ * the read request from the cache whenever possible. If the requested file 
+ * is not found in the cache, the requested is served directly from HDFS.
+ * 
+ * @author mohideen
+ *
+ */
+
 public class CachedHDFSBlob extends HDFSBlob {
   
   private final CachedHDFSBlobStoreConnection conn;
@@ -34,13 +43,13 @@ public class CachedHDFSBlob extends HDFSBlob {
         throw new IllegalStateException("Unable to open Inputstream, because connection is closed");
     }
     try {
-        if(conn.cache.contains(uri.toString())) {
-          //Return from cache
-          return conn.cache.getInputStream(uri.toString());
-        } else {
-          //Return from HDFS
-          return this.conn.getFileSystem().open(path);
-        }
+      try {
+        //return from cache
+        return conn.cache.getInputStream(uri.toString());
+      } catch(FileNotFoundException e) {
+        //if return from cache did not succeed, return from HDFS.
+        return this.conn.getFileSystem().open(path);
+      }
     } catch (FileNotFoundException e) {
         throw new MissingBlobException(uri, e.getLocalizedMessage());
     }

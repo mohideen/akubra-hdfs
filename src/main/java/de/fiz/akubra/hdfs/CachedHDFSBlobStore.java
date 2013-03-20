@@ -8,6 +8,18 @@ import javax.transaction.Transaction;
 
 import org.akubraproject.BlobStoreConnection;
 
+/**
+ * This is an extension of {@link HDFSBlobStore}. This creates a 
+ * {@link CachedHDFSBlobStoreConnection} instead of usual 
+ * {@link BlobStoreConnection}.
+ * 
+ * The parameters specified in the akubra-llstore.xml are passed
+ * on to the {@link CachedHDFSBlobStoreConnection} initialization.
+ * 
+ * @author mohideen
+ *
+ */
+
 public class CachedHDFSBlobStore extends HDFSBlobStore {
   
   private String cacheBase;
