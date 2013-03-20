@@ -16,14 +16,11 @@
  */
 package de.fiz.akubra.hdfs;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 import javax.transaction.Transaction;
 
@@ -31,6 +28,7 @@ import org.akubraproject.BlobStore;
 import org.akubraproject.BlobStoreConnection;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 /**
  * {@link BlobStore} implementation for the Hadoop filesystem.
@@ -88,7 +86,19 @@ public class HDFSBlobStore implements BlobStore {
 
     synchronized FileSystem getFilesystem() throws IOException {
         if (hdfs==null){
-            hdfs=FileSystem.get(this.id, new Configuration());
+            Configuration conf = new Configuration();
+            Configuration clientConf = new Configuration();
+            String fedoraHome = System.getenv("FEDORA_HOME");
+            if(fedoraHome != null) {
+              File confFile = new File(fedoraHome + "/server/config/akubra-hdfs-site.xml");
+              if(confFile.exists()) {
+                clientConf.addResource(new Path(confFile.getPath()));
+              }
+            }
+            conf.setInt("dfs.replication", clientConf.getInt("dfs.replication", 3));
+            conf.setInt("dfs.block.size", clientConf.getInt("dfs.block.size", 128 * 1024 * 1024)); 
+            conf.setInt("dfs.blocksize", clientConf.getInt("dfs.blocksize", 128 * 1024 * 1024)); 
+            hdfs = FileSystem.get(this.id, conf);
         }
         return hdfs;
     }
