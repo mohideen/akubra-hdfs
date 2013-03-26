@@ -6,10 +6,11 @@ as an underlying object and datastream storage.
 
 akubra-hdfs is still in an early development state and in no way ready for production use!
 
-## Modifications
+## Modifications 
 * A cache feature has been added. The interface can be configured to cache specfic locations in HDFS to the local filesystem.
 * The option to specify HDFS blocksize and replication factor from the configuration file is added.
 
+NOTE: Currently, these features are available in the "develop" branch.
 
 Installation instructions (Fedora Commons 3.6.2, Hadoop 1.0.3):
 ---------------------------------------------------------------
