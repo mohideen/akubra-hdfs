@@ -16,14 +16,11 @@
  */
 package de.fiz.akubra.hdfs;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 import javax.transaction.Transaction;
 
@@ -31,6 +28,7 @@ import org.akubraproject.BlobStore;
 import org.akubraproject.BlobStoreConnection;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 /**
  * {@link BlobStore} implementation for the Hadoop filesystem.
@@ -88,7 +86,15 @@ public class HDFSBlobStore implements BlobStore {
 
     synchronized FileSystem getFilesystem() throws IOException {
         if (hdfs==null){
-            hdfs=FileSystem.get(this.id, new Configuration());
+            Configuration conf = new Configuration();
+            File coreSite = new File("/etc/hadoop/core-site.xml");
+            File hdfsSite = new File("/etc/hadoop/hdfs-site.xml");
+            if(coreSite.exists() && hdfsSite.exists()) {
+              conf.clear();
+              conf.addResource(new Path(coreSite.getPath()));
+              conf.addResource(new Path(hdfsSite.getPath()));
+            }
+            hdfs=FileSystem.get(this.id, conf);
         }
         return hdfs;
     }
