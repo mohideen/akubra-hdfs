@@ -87,18 +87,14 @@ public class HDFSBlobStore implements BlobStore {
     synchronized FileSystem getFilesystem() throws IOException {
         if (hdfs==null){
             Configuration conf = new Configuration();
-            Configuration clientConf = new Configuration();
-            String fedoraHome = System.getenv("FEDORA_HOME");
-            if(fedoraHome != null) {
-              File confFile = new File(fedoraHome + "/server/config/akubra-hdfs-site.xml");
-              if(confFile.exists()) {
-                clientConf.addResource(new Path(confFile.getPath()));
-              }
+            File coreSite = new File("/etc/hadoop/core-site.xml");
+            File hdfsSite = new File("/etc/hadoop/hdfs-site.xml");
+            if(coreSite.exists() && hdfsSite.exists()) {
+              conf.clear();
+              conf.addResource(new Path(coreSite.getPath()));
+              conf.addResource(new Path(hdfsSite.getPath()));
             }
-            conf.setInt("dfs.replication", clientConf.getInt("dfs.replication", 3));
-            conf.setInt("dfs.block.size", clientConf.getInt("dfs.block.size", 128 * 1024 * 1024)); 
-            conf.setInt("dfs.blocksize", clientConf.getInt("dfs.blocksize", 128 * 1024 * 1024)); 
-            hdfs = FileSystem.get(this.id, conf);
+            hdfs=FileSystem.get(this.id, conf);
         }
         return hdfs;
     }
