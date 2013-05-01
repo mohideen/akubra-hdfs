@@ -46,9 +46,18 @@ import edu.umd.lib.hadoop.filecache.DiskCache;
 public class HDFSBlobCache extends DiskCache<String, HDFSBlob> {
   
   private CachedHDFSBlobStoreConnection conn;
+  private static HDFSBlobCache _self;
 
   public HDFSBlobCache(File cacheBase) {
     super(cacheBase);
+    if(!cacheBase.exists()) {
+      cacheBase.mkdirs();
+    }
+    _self = this;
+  }
+  
+  public static HDFSBlobCache getHDFSBlobCache() {
+    return _self;
   }
   
   public boolean hasHDFSConnection() {

@@ -40,7 +40,7 @@ public class CachedHDFSBlobStoreConnection extends HDFSBlobStoreConnection {
     this.cacheBase = "/apps/fedora/hdfs/cache";
     this.pathToCache = "TN/TN.0";
     File cacheBaseFile = new File(cacheBase);
-    this.cache = new HDFSBlobCache(cacheBaseFile);
+    this.cache = getCache(cacheBaseFile);
   }
   
   public CachedHDFSBlobStoreConnection(HDFSBlobStore store, String cacheBase) throws IOException {
@@ -49,7 +49,7 @@ public class CachedHDFSBlobStoreConnection extends HDFSBlobStoreConnection {
     this.cacheBase = cacheBase;
     this.pathToCache = "TN/TN.0";
     File cacheBaseFile = new File(cacheBase);
-    this.cache = new HDFSBlobCache(cacheBaseFile);
+    this.cache = getCache(cacheBaseFile);
   }
   
   public CachedHDFSBlobStoreConnection(HDFSBlobStore store, String cacheBase, String pathToCache) throws IOException {
@@ -59,7 +59,16 @@ public class CachedHDFSBlobStoreConnection extends HDFSBlobStoreConnection {
     this.pathToCache = pathToCache;
     
     File cacheBaseFile = new File(cacheBase);
-    this.cache = new HDFSBlobCache(cacheBaseFile);
+    this.cache = getCache(cacheBaseFile);
+  }
+  
+  private HDFSBlobCache getCache(File cacheBaseFile) {
+    if(HDFSBlobCache.getHDFSBlobCache() != null) {
+      HDFSBlobCache.getHDFSBlobCache().setHDFSConnection(this);
+      return HDFSBlobCache.getHDFSBlobCache();
+    } else {
+      return new HDFSBlobCache(cacheBaseFile);
+    }
   }
   
   @Override
@@ -80,13 +89,14 @@ public class CachedHDFSBlobStoreConnection extends HDFSBlobStoreConnection {
     if (!uri.toASCIIString().startsWith("hdfs:")) {
         throw new UnsupportedIdException(uri, "HDFS URIs have to start with 'hdfs:'");
     }
-    if(!cache.hasHDFSConnection()) {
-      cache.setHDFSConnection(this);
-    }
+    
     //create non-cached hdfs blob object
     HDFSBlob blob = new HDFSBlob(uri, this);
-    boolean isThumbnail = uri.toString().endsWith(pathToCache);
-    if(isThumbnail /* return from cache*/) {
+    boolean isCacheable = uri.toString().endsWith(pathToCache);
+    if(isCacheable /* return from cache*/) {
+      if(!cache.hasHDFSConnection()) {
+        cache.setHDFSConnection(this);
+      }
       if(!cache.contains(uri.toString())) {
         //if key does not exists in cache, do
         if(blob.exists()) {
