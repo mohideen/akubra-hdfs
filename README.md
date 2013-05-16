@@ -8,9 +8,9 @@ akubra-hdfs is still in an early development state and in no way ready for produ
 
 ## Modifications 
 * A cache feature has been added. The interface can be configured to cache specfic locations in HDFS to the local filesystem.
-* The option to specify HDFS blocksize and replication factor from the configuration file is added.
+* Hadoop configurations are loaded from core-site.xml and hdfs-site.xml files in ```/etc/hadoop``` directory.
+* Akubra-HDFS can connect to Kerberos secured Hadoop cluster.
 
-NOTE: Currently, these features are available in the "develop" branch.
 
 Installation instructions (Fedora Commons 3.6.2, Hadoop 1.0.3):
 ---------------------------------------------------------------
@@ -33,22 +33,19 @@ Open the file ```$FEDORA_HOME/server/config/akubra-llstore.xml``` and edit the t
 	<bean name="fsObjectStore" class="de.fiz.akubra.hdfs.HDFSBlobStore" singleton="true">
 		<constructor-arg value="hdfs://localhost:9000/fedora/objects"/>
 	</bean>
-	
 	<bean name="fsObjectStoreMapper" class="de.fiz.akubra.hdfs.HDFSIdMapper" singleton="true">
 		<constructor-arg ref="fsObjectStore"/>
 	</bean>
 
-
 	<bean name="fsDatastreamStore" class="de.fiz.akubra.hdfs.HDFSBlobStore" singleton="true">
 		<constructor-arg value="hdfs://localhost:9000/fedora/datastreams"/>
 	</bean>
-
 	<bean name="fsDatastreamStoreMapper" class="de.fiz.akubra.hdfs.HDFSIdMapper" singleton="true">
 		<constructor-arg ref="fsDatastreamStore"/>
-	  </bean>
+	</bean>
 
 
-For using the cached version
+For using the cached version - checkout the 'develop' branch
 
 	<bean name="fsDatastreamStore"
         class="de.fiz.akubra.hdfs.CachedHDFSBlobStore"
@@ -62,30 +59,19 @@ For using the cached version
 	</bean>
 
 
-Create the file ```$FEDORA_HOME/server/config/akubra-hdfs-site.xml``` and add
+Add core-site.xml and hdfs-site.xml configuration files to ```/etc/hadoop```
 
+For kerberos enabled Hadoop clusters, the below configuration needs to be added to the hdfs-site.xml file.
 
-	<?xml version="1.0"?>
-	<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+	<property>
+		<name>akubra.hdfs.kerberos.principal</name>
+		<value>fedora@YOUR-REALM</value> <!-- Kerberos principal. -->
+	</property>
+	<property>
+		<name>akubra.hdfs.keytab.file</name>
+		<value>/etc/hadoop/fedora.keytab</value> <!-- Path to your keytab file. -->
+	</property>
 
-	<!-- Put site-specific property overrides in this file. -->
-
-	<configuration>
-
-	 <property>
-	  <name>dfs.replication</name>
-	  <value>6</value>
-	 </property>
-	 <property>
-	  <name>dfs.block.size</name>
-	  <value>536870912</value>
-	 </property>	
-	 <property>
-	  <name>dfs.blocksize</name> <!-- newer hadoop versions uses dfs.blocksize -->
-	  <value>201326592</value>
-	 </property>
-
-	</configuration>
 
 ### License
 

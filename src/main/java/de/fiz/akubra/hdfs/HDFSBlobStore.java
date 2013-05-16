@@ -29,6 +29,10 @@ import org.akubraproject.BlobStoreConnection;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.security.SecurityUtil;
+import org.apache.hadoop.security.UserGroupInformation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link BlobStore} implementation for the Hadoop filesystem.
@@ -40,6 +44,8 @@ public class HDFSBlobStore implements BlobStore {
     private  FileSystem hdfs;
 
     private final URI id;
+    
+    private static final Logger log = LoggerFactory.getLogger(HDFSBlobStore.class);
 
     /**
      * create a new {@link HDFSBlobStore} at a specific URI in {@link String}
@@ -93,6 +99,14 @@ public class HDFSBlobStore implements BlobStore {
               conf.clear();
               conf.addResource(new Path(coreSite.getPath()));
               conf.addResource(new Path(hdfsSite.getPath()));
+              log.info("Using /etc/hadoop as configuration dir.");
+            } else {
+              log.warn("Using default hadoop configuration! Add core-site.xml and hdfs-site.xml to /etc/hadoop directory.");
+            }
+            if(conf.get("hadoop.security.authentication").equals("kerberos")) {
+              UserGroupInformation.setConfiguration(conf);
+              SecurityUtil.login(conf, "akubra.hdfs.keytab.file", "akubra.hdfs.kerberos.principal");
+              log.info("Login success for principal " + conf.get("akubra.hdfs.kerberos.principal") + " using keytab " + conf.get("akubra.hdfs.keytab.file"));
             }
             hdfs=FileSystem.get(this.id, conf);
         }
