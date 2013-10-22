@@ -12,18 +12,28 @@ akubra-hdfs is still in an early development state and in no way ready for produ
 * Akubra-HDFS can connect to Kerberos secured Hadoop cluster.
 
 
-Installation instructions (Fedora Commons 3.6.2, Hadoop 1.0.3):
+Installation instructions (Fedora Commons 3.6.2):
 ---------------------------------------------------------------
 
 ### Dependencies
 
-Copy the following dependencies to your fedora webapp's WEB-INF/lib directory:
+For Hadoop 1.x - Copy the following dependencies to your fedora webapp's WEB-INF/lib directory:
 * akubra-hdfs-0.0.1-SNAPSHOT.jar (can be found in target/ after building the project)
 * hadoop-core-1.0.3.jar from $HADOOP_HOME/
 * hadoop-client-1.0.3.jar from $HADOOP_HOME/
 * commons-configuration-1.6.jar from $HADOOP_HOME/lib/
 * commons-lang-2.4.jar from $HADOOP_HOME/lib/ 
 
+For CDH4 (Hadoop 2.x) - Copy the following dependencies to your fedora webapp's WEB-INF/lib directory:
+* commons-cli-1.2.jar
+* commons-configuration-1.6.jar
+* commons-lang-2.4.jar
+* guava-11.0.2.jar (This is a newer version of google-collections)
+	* google-collections-1.0-rc2.jar (This has to removed from the fedora lib folder).
+* hadoop-auth-2.0.0-cdh4.1.3.jar
+* hadoop-common-2.0.0-cdh4.1.3.jar
+* hadoop-hdfs-2.0.0-cdh4.1.3.jar
+* protobuf-java-2.4.0a.jar
 
 ### Configuration
 
